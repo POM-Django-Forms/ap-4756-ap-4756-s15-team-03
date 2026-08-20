@@ -1,13 +1,15 @@
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.contrib.auth import get_user_model
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 
+from .forms import AuthorForm
 from .models import Author
 
 User = get_user_model()
+
 
 def is_admin(user) -> bool:
     if user.is_staff:
@@ -18,16 +20,20 @@ def is_admin(user) -> bool:
 @user_passes_test(is_admin)
 def author_list(request: HttpRequest) -> HttpResponse:
     authors = Author.objects.all()
-    return render(request, "author/author_list.html", {"authors": authors})
+    form = AuthorForm()
+    return render(
+        request, "author/author_list.html", {"form": form, "authors": authors}
+    )
 
 
 @user_passes_test(is_admin)
 def author_create(request: HttpRequest) -> HttpResponse:
-    name = request.POST.get("name")
-    surname = request.POST.get("surname")
-    patronymic = request.POST.get("patronymic")
-
-    if not Author.create(name, surname, patronymic):
+    if request.method == "POST":
+        form = AuthorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Author added successfully!")
+            return redirect("author:list")
         messages.error(request, "Invalid creation data")
 
     return author_list(request)

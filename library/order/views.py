@@ -40,10 +40,10 @@ def create_order(request: HttpRequest, book_id: int | None = None) -> HttpRespon
         selected_book_id = request.POST.get("book_id") or book_id
         book = get_object_or_404(Book, pk=selected_book_id)
 
-        plated_end_at = timezone.now() + timedelta(days=random.randint(7, 21))
+        planned_end_at = timezone.now() + timedelta(days=random.randint(7, 21))
 
         new_order = Order.create(
-            user=request.user, book=book, plated_end_at=plated_end_at
+            user=request.user, book=book, planned_end_at=planned_end_at
         )
 
         if new_order:
