@@ -49,46 +49,56 @@
             <div class="card-body p-4">
                 <form method="post" action="{% url 'book:book_create' %}">
                     {% csrf_token %}
-                    
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
                     <div class="row g-3 mb-3">
                         <!-- Book Title Field -->
                         <div class="col-md-8">
-                            <label for="name" class="form-label form-label-custom">TITLE</label>
+                            <label for="{{ form.name.id_for_label }}" class="form-label form-label-custom">TITLE</label>
                             <div class="input-group input-group-glossy">
                                 <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                <input type="text" name="name" id="name" class="form-control border-start-0 ps-0" placeholder="Enter book title" required>
+                                {{ form.name }}
                             </div>
+                            {% if form.name.errors %}
+                                <div class="text-danger small mt-1">{{ form.name.errors|join:" " }}</div>
+                            {% endif %}
                         </div>
-                        
+
                         <!-- Stock Counts Field -->
                         <div class="col-md-4">
-                            <label for="count" class="form-label form-label-custom">INITIAL STOCK</label>
+                            <label for="{{ form.count.id_for_label }}" class="form-label form-label-custom">INITIAL STOCK</label>
                             <div class="input-group input-group-glossy">
                                 <span class="input-group-text"><i class="bi bi-boxes"></i></span>
-                                <input type="number" name="count" id="count" value="1" min="0" class="form-control border-start-0 ps-0" required>
+                                {{ form.count }}
                             </div>
+                            {% if form.count.errors %}
+                                <div class="text-danger small mt-1">{{ form.count.errors|join:" " }}</div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <!-- Description Field -->
                     <div class="mb-3">
-                        <label for="description" class="form-label form-label-custom">DESCRIPTION</label>
-                        <textarea name="description" id="description" rows="5" class="form-control form-control-glossy" placeholder="Provide a summary for this collection index..."></textarea>
+                        <label for="{{ form.description.id_for_label }}" class="form-label form-label-custom">DESCRIPTION</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors|join:" " }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Authors Multi-Select Field -->
                     <div class="mb-4">
-                        <label for="authors" class="form-label form-label-custom">AUTHORS</label>
-                        <select name="authors" id="authors" class="form-select form-select-glossy" multiple style="min-height: 130px;">
-                            {% for author in all_authors %}
-                                <option value="{{ author.id }}">
-                                    {{ author.name }} {{ author.surname }} {{ author.patronymic }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                        <label for="{{ form.authors.id_for_label }}" class="form-label form-label-custom">AUTHORS</label>
+                        {{ form.authors }}
                         <div class="form-text small text-white mt-1">
                             <i class="bi bi-info-circle me-1"></i> Hold down <kbd class="bg-dark text-light border border-secondary">Ctrl</kbd> (Windows) or <kbd class="bg-dark text-light border border-secondary">Cmd</kbd> (Mac) to select multiple items.
                         </div>
+                        {% if form.authors.errors %}
+                            <div class="text-danger small mt-1">{{ form.authors.errors|join:" " }}</div>
+                        {% endif %}
                     </div>
 
                     <!-- Action Buttons Core Footer Block -->

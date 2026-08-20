@@ -1,4 +1,3 @@
-from author.models import Author
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import User
@@ -6,6 +5,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
+from .forms import BookForm
 from .models import Book
 
 
@@ -55,42 +55,29 @@ def book_delete(request: HttpRequest, id: int) -> HttpResponse:
 
 @user_passes_test(is_admin)
 def book_edit(request: HttpRequest, id: int) -> HttpResponse:
+    book = get_object_or_404(Book, pk=id)
+
     if request.method == "POST":
-        book = Book.get_by_id(id)
-        if book:
-            book.name = request.POST.get("name", "").strip()
-            book.description = request.POST.get("description", "").strip()
-            book.count = int(request.POST.get("count", 0))
-            book.save()
-
-            author_ids = request.POST.getlist("authors")
-            book.authors.set(author_ids)
-
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
             messages.success(request, f"Book #{id} has been updated.")
             return redirect("book:book_detail", id=id)
-        else:
-            messages.warning(request, f"Book #{id} does not exist.")
-            return redirect("book:book_list")
+    else:
+        form = BookForm(instance=book)
 
-    book = get_object_or_404(Book, pk=id)
-    return render(
-        request, "book_edit.html", {"book": book, "all_authors": Author.objects.all()}
-    )
+    return render(request, "book_edit.html", {"book": book, "form": form})
 
 
 @user_passes_test(is_admin)
 def book_create(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        name = request.POST.get("name", "").strip()
-        description = request.POST.get("description", "").strip()
-        count = int(request.POST.get("count", 0))
-        author_ids = request.POST.getlist("authors")
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Book has been created.")
+            return redirect("book:book_list")
+    else:
+        form = BookForm()
 
-        book = Book(name=name, description=description, count=count)
-        book.save()
-        book.authors.set(author_ids)
-
-        messages.success(request, "Book has been created.")
-        return redirect("book:book_list")
-
-    return render(request, "book_create.html", {"all_authors": Author.objects.all()})
+    return render(request, "book_create.html", {"form": form})
