@@ -2,69 +2,57 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
+from . import forms
+from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
 
 def login_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
+        form = forms.LoginForm(request.POST)
 
-        if not email or not password:
-            messages.error(request, "Email and password are required")
-            return render(request, "authentication/login.html", {"email": email})
+        if form.is_valid():
+            email = form.cleaned_data["email"]
+            password = form.cleaned_data["password"]
 
-        try:
-            user = User.objects.get(email=email)
-            if user.check_password(password):
+            user = authenticate(request, username=email, password=password)
+
+            if user is not None:
                 login(request, user)
-                messages.success(request, f"Logged in as {email}")
                 return redirect("home")
-        except User.DoesNotExist:
-            pass
 
-        messages.error(request, "Invalid email or password")
-        return render(
-            request, "authentication/login.html", {"email": email, "password": password}
-        )
+            form.add_error(None, "Invalid email or password.")
+    else:
+        form = forms.LoginForm()
 
-    return render(request, "authentication/login.html")
+    return render(request, "authentication/login.html", {"form": form})
 
 
 def register_view(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
-        email = request.POST.get("email")
-        password = request.POST.get("password")
-        extra_fields = {
-            "first_name": request.POST.get("first_name"),
-            "last_name": request.POST.get("last_name"),
-            "middle_name": request.POST.get("middle_name"),
-            "is_active": True,
-        }
+        form = forms.RegisterForm(request.POST)
 
-        if not email or not password:
-            messages.error(request, "Email and password are required")
-            return render(
-                request,
-                "authentication/register.html",
-                {"email": email, "password": password, **extra_fields},
-            )
+        if form.is_valid():
+            cleaned = form.cleaned_data
+            email = cleaned.pop("email")
+            password = cleaned.pop("password")
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "User already exists")
-            return render(
-                request,
-                "authentication/register.html",
-                {"email": email, "password": password, **extra_fields},
-            )
+            try:
+                user = User.objects.create_user(email, password, **cleaned)
+                login(request, user)
+                messages.success(request, f"Logged in as {email}")
+                return render(request, "home", {"user": user})
+            
+            except ValidationError as e:
+                for field, errors in e.error_dict.items():
+                    for error in errors:
+                        form.add_error(field, error)
 
-        user = User.objects.create_user(email, password, **extra_fields)
-        login(request, user)
-        messages.success(request, f"Logged in as {email}")
-        return redirect("home")
+    else:
+        form = forms.RegisterForm()
 
-    return render(request, "authentication/register.html")
+    return render(request, "authentication/register.html", {"form": form})
 
 
 def logout_view(request: HttpRequest) -> HttpResponse:
