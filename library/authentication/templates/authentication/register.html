@@ -11,7 +11,7 @@
                     <i class="bi bi-person-plus"></i> Registration
                 </h1>
             </div>
-            <form method="post" novalidate>
+            <form method="post">
                 {% csrf_token %}
 
                 <div class="row g-3 mb-3">
@@ -55,7 +55,7 @@
                         </div>
                     </div>
                     <div>
-                        <h1 class="form-label form-label-custom">Email Address</h1>
+                        <h1 class="form-label form-label-custom" required>Email Address</h1>
                         <div class="input-group input-group-glossy">
                             <span class="input-group-text"><i class="bi bi-envelope"></i></span>
                             <input
@@ -69,7 +69,7 @@
                         </div>
                     </div>
                     <div>
-                        <h1 class="form-label form-label-custom">Password</h1>
+                        <h1 class="form-label form-label-custom" required>Password</h1>
                         <div class="input-group input-group-glossy">
                             <span class="input-group-text"><i class="bi bi-lock"></i></span>
                             <input

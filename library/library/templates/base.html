@@ -410,6 +410,16 @@
             border-radius: 0.4rem;
             backdrop-filter: blur(4px);
         }
+
+        .user-email {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            color: #6c757d;
+            font-size: 1rem;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
@@ -465,6 +475,10 @@
                             </a>
                         </li>
                     {% else %}
+                        <li class="nav-item user-email">
+                            <i class="bi bi-person-circle"></i>
+                            <span>{{ request.user.email }}</span>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link btn-auth-logout" href="{% url 'auth:logout' %}">
                                 <i class="bi bi-box-arrow-right"></i> Logout

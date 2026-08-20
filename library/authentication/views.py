@@ -68,6 +68,7 @@ def register_view(request: HttpRequest) -> HttpResponse:
 
 
 def logout_view(request: HttpRequest) -> HttpResponse:
+    email = request.user.email if request.user.is_authenticated else "user"
+    messages.success(request, f"Logged out of {email}")
     logout(request)
-    messages.success(request, f"Logged out")
     return redirect("home")

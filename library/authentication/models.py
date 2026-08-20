@@ -1,7 +1,13 @@
 import datetime
 
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
+from django.core.validators import validate_email
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
 class UserRole(models.IntegerChoices):
@@ -36,9 +42,9 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('role', UserRole.LIBRARIAN)
         if extra_fields.get('is_staff') is not True:
-            raise ValueError(('Superuser must have is_staff=True.'))
+            raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError(('Superuser must have is_superuser=True.'))
+            raise ValueError('Superuser must have is_superuser=True.')
         return self.create_user(email, password, **extra_fields)
 
 
@@ -66,10 +72,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         param is_active: user role, default value False
         type updated_at: bool
     """
-    first_name = models.CharField(max_length=20, default=None, null=True)
-    last_name = models.CharField(max_length=20, default=None, null=True)
-    middle_name = models.CharField(max_length=20, default=None, null=True)
-    email = models.CharField(max_length=100, unique=True, default=None)
+    first_name = models.CharField(max_length=20, default=None, null=True, blank=True)
+    last_name = models.CharField(max_length=20, default=None, null=True, blank=True)
+    middle_name = models.CharField(max_length=20, default=None, null=True, blank=True)
+    email = models.CharField(max_length=100, unique=True, default=None, validators=[validate_email])
     password = models.CharField(default=None, max_length=255)
     created_at = models.DateTimeField(editable=False, auto_now=datetime.datetime.now())
     updated_at = models.DateTimeField(auto_now=datetime.datetime.now())
@@ -86,6 +92,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = "User"
         verbose_name_plural = "Users"
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+        
     def __str__(self):
         """
         Magic method is redefined to show all information about CustomUser.
@@ -157,13 +167,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         :type password: str
         :return: a new user object which is also written into the DB
         """
-        if len(first_name) <= 20 and len(middle_name) <= 20 and len(last_name) <= 20 and len(email) <= 100 and len(
-                email.split('@')) == 2 and len(CustomUser.objects.filter(email=email)) == 0:
-            custom_user = CustomUser(email=email, password=password, first_name=first_name, middle_name=middle_name,
-                                     last_name=last_name)
+        try:
+            custom_user = CustomUser(
+                email=email, password=password, first_name=first_name,
+                middle_name=middle_name, last_name=last_name
+                )
             custom_user.save()
             return custom_user
-        return None
+        except ValidationError:
+            return None
 
     def to_dict(self):
         """
@@ -215,20 +227,10 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         :type is_active: bool
         :return: None
         """
-        user_to_update = CustomUser.objects.filter(email=self.email).first()
-        if first_name != None and len(first_name) <= 20:
-            user_to_update.first_name = first_name
-        if last_name != None and len(last_name) <= 20:
-            user_to_update.last_name = last_name
-        if middle_name != None and len(middle_name) <= 20:
-            user_to_update.middle_name = middle_name
-        if password != None:
-            user_to_update.password = password
-        if role != None:
-            user_to_update.role = role
-        if is_active != None:
-            user_to_update.is_active = is_active
-        user_to_update.save()
+        for name, value in locals().items():
+            if name != "self" and value is not None:
+                setattr(self, name, value)
+        self.save()
 
     @staticmethod
     def get_all():
