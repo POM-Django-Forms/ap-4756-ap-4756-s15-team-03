@@ -1,10 +1,9 @@
 from django import forms
 
+from .models import CustomUser
 
-class LoginForm(forms.Form):
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput)
 
+class FormBase(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -12,7 +11,27 @@ class LoginForm(forms.Form):
             field.widget.attrs["class"] = "form-control"
 
 
-class RegisterForm(LoginForm):
-    first_name = forms.CharField()
-    last_name = forms.CharField()
-    middle_name = forms.CharField(required=False)
+class LoginForm(FormBase):
+    password = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = CustomUser
+        fields = ["email", "password"]
+
+
+class RegisterForm(FormBase):
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ["email", "password", "first_name", "last_name", "middle_name"]
+
+
+class EditForm(RegisterForm):
+    password = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
+
+    class Meta:
+        model = CustomUser
+        fields = ["email", "first_name", "last_name", "middle_name"]

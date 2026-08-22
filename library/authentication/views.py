@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model, login, logout
+from django.core.exceptions import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
+
 from . import forms
-from django.core.exceptions import ValidationError
 
 User = get_user_model()
 
@@ -60,3 +61,7 @@ def logout_view(request: HttpRequest) -> HttpResponse:
     messages.success(request, f"Logged out of {email}")
     logout(request)
     return redirect("home")
+
+
+def edit_view(request: HttpRequest) -> HttpResponse:
+    pass
