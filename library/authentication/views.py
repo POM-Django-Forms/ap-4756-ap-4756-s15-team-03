@@ -42,7 +42,7 @@ def register_view(request: HttpRequest) -> HttpResponse:
                 user = User.objects.create_user(email, password, **cleaned)
                 login(request, user)
                 messages.success(request, f"Logged in as {email}")
-                return render(request, "home", {"user": user})
+                return redirect("home")
             
             except ValidationError as e:
                 for field, errors in e.error_dict.items():
