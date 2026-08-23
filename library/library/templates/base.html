@@ -478,7 +478,9 @@
                     {% else %}
                         <li class="nav-item user-email">
                             <i class="bi bi-person-circle"></i>
-                            <span>{{ request.user.email }}</span>
+                            <a href = "{% url "auth:edit" %}">
+                                <span>{{ request.user.email }}</span>
+                            </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link btn-auth-logout" href="{% url 'auth:logout' %}">
