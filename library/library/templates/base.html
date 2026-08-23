@@ -159,6 +159,7 @@
         }
         
         .page-title {
+            line-height: 1.25;
             font-weight: 700;
             font-size: 1.85rem;
             letter-spacing: -0.02em;
@@ -477,9 +478,8 @@
                     
                     {% else %}
                         <li class="nav-item user-email">
-                            <i class="bi bi-person-circle"></i>
-                            <a href = "{% url "auth:edit" %}">
-                                <span>{{ request.user.email }}</span>
+                            <a class="nav-link" href="{% url "auth:edit" %}">
+                                <i class="bi bi-person-circle"></i> {{ request.user.email }}
                             </a>
                         </li>
                         <li class="nav-item">

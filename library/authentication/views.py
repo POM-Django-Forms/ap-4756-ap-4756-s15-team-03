@@ -76,6 +76,7 @@ def edit_view(request: HttpRequest) -> HttpResponse:
 
             if edit_form.is_valid():
                 edit_form.save()
+                messages.success(request, f"User information edited successfully")
                 return redirect("home")
 
         elif request.POST.get("action") == "password":
@@ -86,6 +87,7 @@ def edit_view(request: HttpRequest) -> HttpResponse:
                 user.set_password(password_form.cleaned_data["password"])
                 user.save()
                 login(request, user)
+                messages.success(request, f"Password successfully changed")
                 return redirect("home")
 
     else:
