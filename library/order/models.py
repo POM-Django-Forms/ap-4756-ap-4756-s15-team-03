@@ -37,7 +37,7 @@ class Order(models.Model):
                 f" Book: {self.book!s},"
                 f" Created at: '{self.created_at}',"
                 f" Planned return on: '{self.planned_end_at}',"
-                f" Actual return on: {self.end_at if self.end_at is not None else "-"}"
+                f" Actual return on: {self.end_at if self.end_at is not None else '-'}"
             )
 
     def __repr__(self):

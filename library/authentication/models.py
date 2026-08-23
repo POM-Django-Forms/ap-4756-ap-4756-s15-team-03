@@ -5,7 +5,6 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
-from django.core.validators import validate_email
 from django.db import models
 from django.core.exceptions import ValidationError
 

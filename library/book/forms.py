@@ -39,6 +39,7 @@ class BookForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["authors"].queryset = Author.objects.all()
+        self.fields["name"].required = True
         if not self.instance.pk:
             self.fields["count"].initial = 1
 
