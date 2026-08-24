@@ -33,11 +33,19 @@ class EditForm(FormBase):
 
 
 class RegisterForm(EditForm):
-    password = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput, label="Repeat password")
 
     class Meta:
         model = CustomUser
         fields = ["email", "password", "first_name", "last_name", "middle_name"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get("password") != cleaned_data.get("password2"):
+            raise ValidationError("Passwords don't match.")
+
+        return cleaned_data
 
 
 class PasswordForm(forms.Form):
